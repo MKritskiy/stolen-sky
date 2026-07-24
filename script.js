@@ -150,7 +150,7 @@
     let holdTimer = 0;
 
     function resize() {
-      const w = canvas.parentElement.clientWidth;
+      const w = canvas.parentElement.clientWidth || 280;
       const h = Math.max(220, Math.min(300, Math.round(w * 0.82)));
       const dpr = window.devicePixelRatio || 1;
       canvas.width = w * dpr;
@@ -158,14 +158,11 @@
       canvas.style.width = w + "px";
       canvas.style.height = h + "px";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // если облако уже собрано — перерисовать финальный кадр (иначе canvas.width сбросит контент)
+      if (locked) drawFrame();
     }
 
-    function render() {
-      if (locked) return;
-      rotX += velX;
-      rotY += velY;
-      velX *= 0.9;
-      velY *= 0.9;
+    function drawFrame() {
       const w = parseFloat(canvas.style.width) || 260;
       const h = parseFloat(canvas.style.height) || 260;
       const cx = w / 2;
@@ -200,6 +197,15 @@
         ctx.fill();
       }
       ctx.shadowBlur = 0;
+    }
+
+    function render() {
+      if (locked) return;
+      rotX += velX;
+      rotY += velY;
+      velX *= 0.9;
+      velY *= 0.9;
+      drawFrame();
 
       // проверка попадания в целевой ракурс (0,0)
       const normY = normAngle(rotY);
@@ -214,7 +220,7 @@
           readout.textContent = "Ракурс найден";
           canvas.style.pointerEvents = "none";
           form.classList.remove("hidden");
-          input.focus({ preventScroll: true });
+          // автофокус убран — клавиатура на iOS не выезжает; пользователь тапает по полю сам
         }
       } else {
         holdTimer = 0;
@@ -287,7 +293,8 @@
         locked = true;
         rotX = 0;
         rotY = 0;
-        render();
+        resize();   // установить размеры canvas (parent может быть display:none → fallback 280)
+        drawFrame();
         result.textContent = "Это цифра";
         result.classList.add("found");
         readout.textContent = "Ракурс найден";
@@ -327,7 +334,7 @@
         status.textContent = "Верно: третьим ушла Москва · № 401";
         status.classList.add("ok");
         form.classList.remove("hidden");
-        input.focus({ preventScroll: true });
+        // автофокус убран — клавиатура на iOS не выезжает автоматически
       } else {
         card.classList.remove("shake");
         void card.offsetWidth;
@@ -446,7 +453,7 @@
         status.textContent = `Лампы сошлись. Штурвал на отметке ${dialVal}.`;
         status.classList.add("ok");
         form.classList.remove("hidden");
-        input.focus({ preventScroll: true });
+        // автофокус убран — клавиатура на iOS не выезжает автоматически
       } else {
         const ls = lampStates();
         const litL = ls.Z + ls.Y + ls.K + ls.C;
@@ -578,7 +585,7 @@
         readout.textContent = "45°";
         svg.style.pointerEvents = "none";
         form.classList.remove("hidden");
-        input.focus({ preventScroll: true });
+        // автофокус убран — клавиатура на iOS не выезжает автоматически
       }
     }
     function up() {
