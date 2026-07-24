@@ -3,7 +3,7 @@
 
   const state = { solved: 0, cipherSolved: false };
   const STORAGE_KEY = "case20_progress";
-  const expectedDigits = ["7", "1", "3", "4"];
+  const expectedDigits = ["8", "1", "3", "4"];
 
   /* ---------- сохранение прогресса ---------- */
   function persist() {
@@ -38,9 +38,9 @@
   /* ---------- подсказки ---------- */
   const hints = {
     0: [
-      "Цифру размазывает любой наклон. Нужен вид строго «в лицо» облаку.",
-      "Верни вращение в начальное положение — без поворота влево/вправо и без наклона вверх/вниз.",
-      "Это семёрка. Ответ: 7."
+      "Покрути облако частиц и найди тот ракурс, с которого проступает цифра.",
+      "Цифру размазывает любой наклон. Нужен вид строго «в лицо» облаку — без поворота влево/вправо и без наклона вверх/вниз.",
+      "Это восьмёрка. Ответ: 8."
     ],
     1: [
       "«Между Казанью и Сочи ровно два рейса» — значит они на противоположных концах очереди (позиции 1 и 4).",
@@ -48,8 +48,8 @@
       "Третий рейс — Москва №401. Последняя цифра: 1. Ответ: 1."
     ],
     2: [
-      "В радиограмме цвета спрятаны за образами. Молодой лист — зелёный, спелый мёд — жёлтый, небо над головою — синий. А огонь — красный — должен спать.",
-      "Чёт гасит, нечёт зажигает. Найди два тумблера, чьи цвета сходятся только на красной — тогда красная погаснет, а синей не хватит одного голоса, и его добавит штурвал.",
+      "Тумблеры замыкают цепи ламп: Радио — зелёную, жёлтую и синюю; Шасси — красную и жёлтую; Ток — зелёную и красную; Связь — синюю.",
+      "Цвета складываются по чётности: две цепи на одной лампе — гасят её, три — зажигают (чёт гасит, нечёт зажигает). Штурвал — пятый голос: куда укажет стрелка, тот цвет и присоединяется к счёту. В радиограмме: молодой лист — зелёный, спелый мёд — жёлтый, небо над головою — синий, открытый огонь — красный (он должен спать).",
       "Включи Шасси и Ток, поставь штурвал на синюю (отметка 3). Ответ: 3."
     ],
     3: [
@@ -86,6 +86,23 @@
     requestAnimationFrame(() => section.scrollIntoView({ behavior: "smooth", block: "start" }));
   }
 
+  // Навигация между уликами (возврат к уже решённым с зафиксированным ответом).
+  // cloud = initCloud() определяется ниже; к моменту вызова goTo (по клику) уже готов.
+  function goTo(index) {
+    clues.forEach((c, i) => c.classList.toggle("active", i === index));
+    clues[index].scrollIntoView({ behavior: "smooth", block: "start" });
+    if (index === 0) window.setTimeout(() => cloud.resize(), 50);
+    updateNav();
+  }
+  function updateNav() {
+    clues.forEach((clue, i) => {
+      const next = clue.querySelector(".nav-next");
+      if (!next) return;
+      const hasNext = i < clues.length - 1 && clues[i + 1].dataset.solved === "1";
+      next.style.visibility = hasNext ? "" : "hidden";
+    });
+  }
+
   function updateProgress(index, digit) {
     digitSlots[index].textContent = digit;
     digitSlots[index].classList.add("revealed");
@@ -100,6 +117,7 @@
     updateProgress(index, expectedDigits[index]);
     state.solved = index + 1;
     persist();
+    updateNav();
     window.setTimeout(() => {
       clues[index].classList.remove("active");
       if (index < clues.length - 1) {
@@ -124,16 +142,18 @@
     const input = document.getElementById("answer-0");
     const feedback = document.getElementById("feedback-0");
 
-    // точки, образующие цифру 7 на плоскости XY + случайная глубина Z
+    // точки, образующие цифру 8 на плоскости XY + случайная глубина Z
     function buildPoints() {
       const p = [];
-      for (let i = 0; i < 22; i += 1) {
-        const t = i / 21;
-        p.push([-0.5 + t * 1.0, 0.55, (Math.random() * 2 - 1) * 1.3]);
+      // верхнее кольцо (меньше): центр (0, 0.32), радиус 0.24
+      for (let i = 0; i < 16; i += 1) {
+        const a = (i / 16) * Math.PI * 2;
+        p.push([Math.cos(a) * 0.24, 0.32 + Math.sin(a) * 0.24, (Math.random() * 2 - 1) * 1.3]);
       }
-      for (let i = 1; i < 29; i += 1) {
-        const t = i / 28;
-        p.push([0.5 - t * 1.0, 0.55 - t * 1.15, (Math.random() * 2 - 1) * 1.3]);
+      // нижнее кольцо (больше): центр (0, -0.30), радиус 0.38
+      for (let i = 0; i < 26; i += 1) {
+        const a = (i / 26) * Math.PI * 2;
+        p.push([Math.cos(a) * 0.38, -0.30 + Math.sin(a) * 0.38, (Math.random() * 2 - 1) * 1.3]);
       }
       return p;
     }
@@ -311,10 +331,12 @@
 
   /* ===========================================================
      УЛИКА 02 — маршрутный журнал (очерёдность вылета)
-     =========================================================== */
-  // data-pos = настоящая позиция в очереди вылета (0..3)
-  // порядок: Самара(0) → Казань(1) → Москва(2) → Сочи(3)
-  // третьим (pos=2) улетает Москва, №401 → последняя цифра 1
+     ===========================================================
+     data-pos = настоящая позиция в очереди вылета (0..3)
+     порядок: Казань(0) → Самара(1) → Москва(2) → Сочи(3)
+     Механика: тапать рейсы в порядке вылета; проверка только когда
+     расставлены все 4. Неверно → сброс. Нельзя «протыкать наугад».
+     */
   function initJournal() {
     const board = document.getElementById("journalBoard");
     const status = document.getElementById("journalStatus");
@@ -322,25 +344,47 @@
     const input = document.getElementById("answer-1");
     const feedback = document.getElementById("feedback-1");
     const cards = [...board.querySelectorAll(".flight-card")];
-    const CORRECT_POS = "2";
+    let order = [];   // массив data-pos в порядке кликов
     let locked = false;
 
+    function reset(msg) {
+      const placed = cards.filter((c) => c.disabled);
+      order = [];
+      cards.forEach((c) => {
+        c.disabled = false;
+        c.classList.remove("picked");
+        delete c.dataset.order;
+      });
+      placed.forEach((c) => {
+        c.classList.remove("shake");
+        void c.offsetWidth;
+        c.classList.add("shake");
+      });
+      status.textContent = msg;
+      status.classList.remove("ok");
+    }
+
     function pick(card) {
-      if (locked) return;
-      if (card.dataset.pos === CORRECT_POS) {
+      if (locked || card.disabled) return;
+      order.push(card.dataset.pos);
+      card.dataset.order = String(order.length);
+      card.classList.add("picked");
+      card.disabled = true;
+      status.textContent = `Расставлено: ${order.length} из 4`;
+      if (order.length === 4) check();
+    }
+
+    function check() {
+      // правильный порядок кликов = по возрастанию data-pos (0,1,2,3)
+      const correct = order.every((pos, i) => Number(pos) === i);
+      if (correct) {
         locked = true;
         cards.forEach((c) => (c.disabled = true));
-        card.classList.add("picked");
-        status.textContent = "Верно: третьим ушла Москва · № 401";
+        status.textContent = "Верно: очерёдность восстановлена · Москва №401 ушла третьей";
         status.classList.add("ok");
         form.classList.remove("hidden");
-        // автофокус убран — клавиатура на iOS не выезжает автоматически
       } else {
-        card.classList.remove("shake");
-        void card.offsetWidth;
-        card.classList.add("shake");
-        status.textContent = "Это не третий рейс по счёту. Восстанови порядок.";
-        status.classList.remove("ok");
+        reset("Неверный порядок вылета. Восстанови очерёдность по показаниям и начни заново.");
       }
     }
 
@@ -365,10 +409,13 @@
     return {
       restoreSolved() {
         locked = true;
-        const right = cards.find((c) => c.dataset.pos === CORRECT_POS);
-        if (right) right.classList.add("picked");
-        cards.forEach((c) => (c.disabled = true));
-        status.textContent = "Третьим ушла Москва · № 401";
+        order = ["0", "1", "2", "3"];
+        cards.forEach((c) => {
+          c.dataset.order = String(Number(c.dataset.pos) + 1);
+          c.classList.add("picked");
+          c.disabled = true;
+        });
+        status.textContent = "Очерёдность восстановлена · Москва №401 ушла третьей";
         status.classList.add("ok");
         form.classList.remove("hidden");
         input.value = expectedDigits[1];
@@ -577,6 +624,11 @@
     function move(clientX, clientY) {
       if (!dragging || locked) return;
       setArrow(angleFromPointer(clientX, clientY));
+    }
+    function up() {
+      dragging = false;
+      if (locked) return;
+      // фиксация только по отпусканию — нельзя «прокрутить наугад» через цель
       let diff = Math.abs(angle - TARGET);
       if (diff > 180) diff = 360 - diff;
       if (diff < 6) {
@@ -587,9 +639,6 @@
         form.classList.remove("hidden");
         // автофокус убран — клавиатура на iOS не выезжает автоматически
       }
-    }
-    function up() {
-      dragging = false;
     }
 
     svg.addEventListener("pointerdown", (e) => {
@@ -709,6 +758,32 @@
   const panel = initPanel();
   const compass = initCompass();
 
+  /* ---------- навигация между уликами (возврат к решённым) ---------- */
+  clues.forEach((clue, i) => {
+    const nav = document.createElement("div");
+    nav.className = "clue-nav";
+    const prev = document.createElement("button");
+    prev.className = "nav-button nav-prev";
+    prev.type = "button";
+    if (i > 0) {
+      prev.textContent = `← Улика 0${i}`;
+      prev.addEventListener("click", () => goTo(i - 1));
+    } else {
+      prev.style.visibility = "hidden";
+    }
+    const next = document.createElement("button");
+    next.className = "nav-button nav-next";
+    next.type = "button";
+    if (i < clues.length - 1) {
+      next.textContent = `Улика 0${i + 2} →`;
+      next.addEventListener("click", () => goTo(i + 1));
+    }
+    next.style.visibility = "hidden";
+    nav.appendChild(prev);
+    nav.appendChild(next);
+    clue.appendChild(nav);
+  });
+
   /* ---------- восстановление прогресса ---------- */
   function restore() {
     const data = loadSaved();
@@ -730,6 +805,7 @@
     state.solved = n;
     progressLabel.textContent = `${n} / 4`;
     progressFill.style.width = `${n * 25}%`;
+    updateNav();
 
     if (data.cipher) {
       state.cipherSolved = true;

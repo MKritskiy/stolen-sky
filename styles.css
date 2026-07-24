@@ -42,7 +42,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .orb-two { width: 220px; height: 220px; background: var(--gold); left: -120px; bottom: 8%; }
 
 .case-header { position: relative; z-index: 1; flex: 0 0 auto; }
-main { position: relative; z-index: 1; flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+main { position: relative; z-index: 1; flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
 footer { position: relative; z-index: 1; flex: 0 0 auto; }
 .case-header {
   width: min(100% - 40px, 760px);
@@ -91,7 +91,7 @@ h1 em { color: var(--gold); font-style: normal; }
 .hidden { display: none !important; }
 
 .investigation { padding: 34px 0 90px; }
-.progress-wrap { position: sticky; top: max(0px, env(safe-area-inset-top)); z-index: 10; margin: 0 -16px 34px; padding: 14px 16px 16px; background: rgba(7,17,31,.9); border-bottom: 1px solid var(--line); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.progress-wrap { position: sticky; top: max(0px, env(safe-area-inset-top)); z-index: 10; margin: 0 0 34px; padding: 14px 16px 16px; background: rgba(7,17,31,.9); border: 1px solid var(--line); border-left: 0; border-right: 0; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 .progress-meta { display: flex; justify-content: space-between; margin-bottom: 9px; color: var(--muted); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
 .progress-track { height: 2px; overflow: hidden; background: rgba(255,255,255,.09); }
 .progress-fill { width: 0; height: 100%; background: linear-gradient(90deg, var(--gold), var(--cyan)); transition: width .7s cubic-bezier(.2,.8,.2,1); }
@@ -146,12 +146,13 @@ h1 em { color: var(--gold); font-style: normal; }
 .clue-list li { position: relative; margin: 0 0 9px; padding: 9px 12px 9px 38px; border: 1px solid var(--line); border-left: 2px solid var(--cyan); background: rgba(121,215,218,.05); color: #c4d4da; font-family: var(--serif); font-size: 14px; line-height: 1.5; }
 .clue-list li::before { counter-increment: step; content: counter(step); position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; display: grid; place-items: center; border: 1px solid var(--gold); border-radius: 50%; color: var(--gold); font-family: var(--sans); font-size: 9px; font-weight: 700; }
 .journal-board { margin: 18px 0 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
-.flight-card { appearance: none; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; padding: 13px 14px; border: 1px solid var(--line); border-radius: 3px; background: linear-gradient(150deg, rgba(241,234,217,.07), rgba(241,234,217,.02)); text-align: left; cursor: pointer; transition: border-color .2s, transform .12s, background .2s; }
+.flight-card { appearance: none; position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; padding: 13px 14px; border: 1px solid var(--line); border-radius: 3px; background: linear-gradient(150deg, rgba(241,234,217,.07), rgba(241,234,217,.02)); text-align: left; cursor: pointer; transition: border-color .2s, transform .12s, background .2s; }
 .flight-card:active { transform: scale(.97); }
 .flight-card:hover { border-color: rgba(244,201,77,.5); }
 .fc-city { font-family: var(--serif); font-size: 17px; color: var(--paper); letter-spacing: .01em; }
 .fc-num { font-size: 11px; letter-spacing: .12em; color: var(--gold); }
 .flight-card.picked { border-color: var(--gold); background: rgba(244,201,77,.12); box-shadow: 0 0 0 1px var(--gold), 0 12px 30px rgba(244,201,77,.14); }
+.flight-card.picked::after { content: attr(data-order); position: absolute; top: -10px; right: -10px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--gold); color: var(--night); font-family: var(--serif); font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(244,201,77,.4); }
 .flight-card:disabled { cursor: default; opacity: .72; }
 .flight-card.picked:disabled { opacity: 1; }
 .journal-status { margin: 12px 0 0; color: var(--muted); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; text-align: center; min-height: 16px; }
@@ -236,6 +237,11 @@ h1 em { color: var(--gold); font-style: normal; }
 .hint-button:disabled { color: #45566a; cursor: default; opacity: .7; }
 .hint-text { display: none; margin: 9px 0 0; padding: 11px 13px; border-left: 2px solid var(--cyan); background: rgba(121,215,218,.06); color: #c4d4da; font-size: 12px; line-height: 1.6; }
 .hint-text.visible { display: block; animation: rise .35s ease both; }
+
+.clue-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.nav-button { padding: 4px 0; border: 0; background: none; color: var(--muted); font: inherit; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; transition: color .2s ease; }
+.nav-button:hover { color: var(--gold); }
+.nav-button[style*="visibility: hidden"] { pointer-events: none; }
 
 .finale { overflow: hidden; padding-top: 0; border-color: rgba(244,201,77,.25); }
 .constellation { position: relative; height: 180px; margin: 0 -22px 26px; background: radial-gradient(ellipse at 50% 0%, rgba(121,215,218,.18), transparent 65%); }
