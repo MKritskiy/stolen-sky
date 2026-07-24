@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07111f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Дело №20 — Похищенное небо</title>
+  <meta name="description" content="Закрытое расследование Бейкер-стрит: дело о похищенном небе.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Prata&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="sky" aria-hidden="true">
+    <div class="stars" id="stars"></div>
+    <div class="orb orb-one"></div>
+    <div class="orb orb-two"></div>
+  </div>
+
+  <header class="case-header">
+    <div class="eyebrow"><span class="pulse"></span> Бейкер-стрит · закрытый архив</div>
+    <div class="case-number">Дело № 20</div>
+  </header>
+
+  <main>
+    <section class="hero" id="hero">
+      <div class="hero-mark" aria-hidden="true">
+        <svg viewBox="0 0 120 120" role="img">
+          <circle cx="60" cy="60" r="48" fill="none" stroke="currentColor" stroke-width="1" opacity=".4"/>
+          <path d="M32 76c15-3 23-12 28-28 5 16 13 25 28 28-15 3-23 12-28 28-5-16-13-25-28-28Z" fill="currentColor"/>
+          <circle cx="86" cy="34" r="4" fill="#f4c94d"/>
+        </svg>
+      </div>
+      <p class="kicker">Совершенно секретно</p>
+      <h1>Похищенное<br><em>небо</em></h1>
+      <p class="hero-copy">Ангелина, этой ночью над Шереметьево исчезло небо. На месте происшествия обнаружены следы банана и несколько подозрительно маленьких отпечатков.</p>
+      <div class="briefing">
+        <span>Подозреваемые</span>
+        <strong>Жёлтые. Шумные. Отрицают всё.</strong>
+      </div>
+      <button class="primary-button" id="startButton" type="button">Принять дело <span>→</span></button>
+      <p class="microcopy">Ничего искать в комнате не придётся. Всё дело уже перед тобой.</p>
+    </section>
+
+    <section class="investigation hidden" id="investigation" aria-live="polite">
+      <div class="progress-wrap">
+        <div class="progress-meta">
+          <span>Ход расследования</span>
+          <span id="progressLabel">0 / 4</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="digits" aria-label="Полученные цифры">
+          <span>—</span><span>—</span><span>—</span><span>—</span>
+        </div>
+        <button class="reset-link" id="resetProgress" type="button">сбросить прогресс</button>
+      </div>
+
+      <article class="clue active" data-clue="0" data-answer="7">
+        <div class="clue-topline"><span>Улика 01</span><span>Облако · перспектива</span></div>
+        <h2>Скрытое в облаке</h2>
+        <p class="dispatch">Свидетель оставил запись: «Я разглядел это лишь однажды — когда свет упал под единственно верным углом». Покрути облако частиц и найди тот ракурс, с которого проступает цифра.</p>
+        <div class="cloud-stage">
+          <canvas class="point-cloud" id="cloudCanvas"></canvas>
+          <div class="cloud-overlay" id="cloudOverlay">
+            <span class="cloud-readout" id="cloudReadout">Вращай облако пальцем</span>
+            <div class="cloud-result" id="cloudResult"></div>
+          </div>
+        </div>
+        <form class="answer-form hidden" id="cloudForm">
+          <label for="answer-0">Запиши цифру, которую показало облако</label>
+          <div class="answer-row">
+            <input id="answer-0" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-describedby="feedback-0">
+            <button type="submit">Проверить</button>
+          </div>
+          <p class="feedback" id="feedback-0"></p>
+        </form>
+        <button class="hint-button" type="button" data-hint="0">Подсказка</button>
+        <p class="hint-text" id="hint-0"></p>
+      </article>
+
+      <article class="clue" data-clue="1" data-answer="1">
+        <div class="clue-topline"><span>Улика 02</span><span>Маршрутный журнал</span></div>
+        <h2>Очерёдность вылета</h2>
+        <p class="dispatch">Журнал диспетчера залит кофе, но три обрывка показаний уцелели. Восстанови по ним очерёдность вылета четырёх рейсов и укажи рейс, ушедший третьим, — последняя цифра его номера и есть ответ.</p>
+        <ol class="clue-list">
+          <li>«Между вылетом Казани и Сочи уместилось ровно два других рейса.»</li>
+          <li>«Самара поднялась в воздух раньше Москвы.»</li>
+          <li>«Казань оторвалась от полосы раньше Самары.»</li>
+        </ol>
+        <div class="journal-board" id="journalBoard">
+          <button class="flight-card" type="button" data-pos="2"><span class="fc-city">Москва</span><span class="fc-num">№ 401</span></button>
+          <button class="flight-card" type="button" data-pos="0"><span class="fc-city">Казань</span><span class="fc-num">№ 274</span></button>
+          <button class="flight-card" type="button" data-pos="3"><span class="fc-city">Сочи</span><span class="fc-num">№ 868</span></button>
+          <button class="flight-card" type="button" data-pos="1"><span class="fc-city">Самара</span><span class="fc-num">№ 532</span></button>
+        </div>
+        <p class="journal-status" id="journalStatus">Кликни рейс, вылетевший третьим</p>
+        <form class="answer-form hidden" id="journalForm">
+          <label for="answer-1">Последняя цифра номера третьего рейса</label>
+          <div class="answer-row">
+            <input id="answer-1" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-describedby="feedback-1">
+            <button type="submit">Проверить</button>
+          </div>
+          <p class="feedback" id="feedback-1"></p>
+        </form>
+        <button class="hint-button" type="button" data-hint="1">Подсказка</button>
+        <p class="hint-text" id="hint-1"></p>
+      </article>
+
+      <article class="clue" data-clue="2" data-answer="3">
+        <div class="clue-topline"><span>Улика 03</span><span>Приборная панель · логика</span></div>
+        <h2>Цветовой код</h2>
+        <p class="dispatch">На пульте четыре тумблера, четыре сигнальные лампы и штурвал-селектор. Каждый тумблер окрашивает релейные цепи в свои цвета. Разберись, как пересекаются цепи, и набери нужную комбинацию ламп.</p>
+        <ol class="clue-list">
+          <li>«Радио замыкает зелёную, жёлтую и синюю цепи.»</li>
+          <li>«Шасси замыкают красную и жёлтую.»</li>
+          <li>«Ток замыкает зелёную и красную.»</li>
+          <li>«Связь замыкает синюю.»</li>
+          <li>«Две цепи, сошедшиеся на одной лампе, гасят её; три — вновь зажигают. Чёт — гасит, нечёт — зажигает.»</li>
+          <li>«Штурвал — пятый голос: куда укажет стрелка, тот цвет и присоединяется к общему счёту.»</li>
+          <li>«Радиограмма из архива: "Открой навстречу свету три окна — цвет молодого листа, цвет спелого мёда и цвет неба над головою. А цвет открытого огня оставь во тьме." Штурвал укажет цифру ответа.»</li>
+        </ol>
+        <div class="panel-board" id="panelBoard">
+          <div class="panel-toggles">
+            <button class="toggle" type="button" data-sw="R"><span class="tg-name">Радио</span><span class="tg-track"><i class="tg-knob"></i></span></button>
+            <button class="toggle" type="button" data-sw="H"><span class="tg-name">Шасси</span><span class="tg-track"><i class="tg-knob"></i></span></button>
+            <button class="toggle" type="button" data-sw="T"><span class="tg-name">Ток</span><span class="tg-track"><i class="tg-knob"></i></span></button>
+            <button class="toggle" type="button" data-sw="S"><span class="tg-name">Связь</span><span class="tg-track"><i class="tg-knob"></i></span></button>
+          </div>
+          <div class="panel-instruments">
+            <div class="panel-lamps">
+              <div class="lamp lamp-green" data-lamp="Z"><i class="lamp-bulb"></i><span class="lamp-name">Зелёная</span></div>
+              <div class="lamp lamp-yellow" data-lamp="Y"><i class="lamp-bulb"></i><span class="lamp-name">Жёлтая</span></div>
+              <div class="lamp lamp-red" data-lamp="K"><i class="lamp-bulb"></i><span class="lamp-name">Красная</span></div>
+              <div class="lamp lamp-blue" data-lamp="C"><i class="lamp-bulb"></i><span class="lamp-name">Синяя</span></div>
+            </div>
+            <div class="panel-dial-wrap">
+              <button class="dial" id="panelDial" type="button" aria-label="Штурвал-селектор">
+                <span class="dial-face">
+                  <span class="dial-tick tick-green">З</span>
+                  <span class="dial-tick tick-yellow">Ж</span>
+                  <span class="dial-tick tick-red">К</span>
+                  <span class="dial-tick tick-blue">С</span>
+                  <i class="dial-needle"></i>
+                </span>
+                <span class="dial-readout" id="dialReadout">—</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <p class="panel-status" id="panelStatus">Настрой панель так, чтобы сошлись все условия</p>
+        <form class="answer-form hidden" id="panelForm">
+          <label for="answer-2">Какую цифру показывает штурвал-селектор?</label>
+          <div class="answer-row">
+            <input id="answer-2" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-describedby="feedback-2">
+            <button type="submit">Проверить</button>
+          </div>
+          <p class="feedback" id="feedback-2"></p>
+        </form>
+        <button class="hint-button" type="button" data-hint="2">Подсказка</button>
+        <p class="hint-text" id="hint-2"></p>
+      </article>
+
+      <article class="clue" data-clue="3" data-answer="4">
+        <div class="clue-topline"><span>Улика 04</span><span>Бортовой журнал · снос</span></div>
+        <h2>Куда улетел самолёт</h2>
+        <p class="dispatch">Командир держал курс ровно на СЕВЕР. Но весь полёт ветер дул с ЗАПАДА — в точности с той же силой, что тяга двигателей. Приземлившись, он увидел, что сбился с маршрута. Определи угол между тем, куда он смотрел, и тем, куда улетел на самом деле. Первая цифра этого угла и есть ответ.</p>
+        <div class="compass-wrap">
+          <svg class="compass" id="compass" viewBox="0 0 200 200">
+            <circle class="compass-ring" cx="100" cy="100" r="92" />
+            <circle class="compass-ring inner" cx="100" cy="100" r="64" />
+            <g class="compass-marks" id="compassMarks"></g>
+            <text class="compass-label" x="100" y="20" text-anchor="middle">С</text>
+            <text class="compass-label" x="184" y="105" text-anchor="middle">В</text>
+            <text class="compass-label" x="100" y="190" text-anchor="middle">Ю</text>
+            <text class="compass-label" x="16" y="105" text-anchor="middle">З</text>
+            <line class="course-arrow" x1="100" y1="100" x2="100" y2="24" />
+            <line class="drift-arrow" id="driftArrow" x1="100" y1="100" x2="100" y2="24" />
+            <circle class="compass-hub" cx="100" cy="100" r="6" />
+            <text class="compass-readout" id="compassReadout" x="100" y="128" text-anchor="middle">0°</text>
+          </svg>
+          <p class="compass-hint">Тяни стрелку, чтобы указать истинный путь</p>
+        </div>
+        <form class="answer-form hidden" id="compassForm">
+          <label for="answer-3">Назови первую цифру угла сноса</label>
+          <div class="answer-row">
+            <input id="answer-3" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-describedby="feedback-3">
+            <button type="submit">Проверить</button>
+          </div>
+          <p class="feedback" id="feedback-3"></p>
+        </form>
+        <button class="hint-button" type="button" data-hint="3">Подсказка</button>
+        <p class="hint-text" id="hint-3"></p>
+      </article>
+
+      <section class="checkpoint hidden" id="checkpoint">
+        <p class="kicker">Первый рубеж пройден</p>
+        <h2>Код восстановлен</h2>
+        <div class="big-code" aria-label="Код 7 1 3 4"><span>7</span><span>1</span><span>3</span><span>4</span></div>
+        <p>Введи эти цифры на замке отдельной коробочки. Внутри лежит ключ от второго уровня шкатулки.</p>
+        <div class="instruction-card">
+          <span>01</span><p>Открой коробочку кодом <strong>7134</strong></p>
+          <span>02</span><p>Возьми ключ и открой <strong>второй уровень</strong> шкатулки</p>
+          <span>03</span><p>Допроси миньонов и найди бумажную шифровку</p>
+        </div>
+        <button class="primary-button" id="haveCipherButton" type="button">Шифровка у меня <span>→</span></button>
+      </section>
+
+      <section class="decoder hidden" id="decoder">
+        <div class="decoder-orbit" aria-hidden="true"><span></span></div>
+        <p class="kicker">Последний протокол</p>
+        <h2>Расшифруй признание</h2>
+        <p>Миньоны оставили четыре числа и подпись <strong class="signature-clue">А1Я33</strong>. Каждое число — это буква. Разберись, что значит подпись, и переведи числа в слово.</p>
+        <p class="decoder-hint">Введи слово, которое получилось.</p>
+        <form id="cipherForm" class="cipher-form">
+          <label for="cipherInput">Секретное слово</label>
+          <input id="cipherInput" type="text" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="••••" maxlength="12" aria-describedby="cipherFeedback">
+          <button class="primary-button" type="submit">Завершить расследование <span>→</span></button>
+          <p class="feedback" id="cipherFeedback"></p>
+          <button class="hint-button" type="button" data-hint="cipher">Подсказка</button>
+          <p class="hint-text" id="hint-cipher"></p>
+        </form>
+      </section>
+
+      <section class="finale hidden" id="finale">
+        <div class="constellation" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i>
+          <svg viewBox="0 0 320 170" preserveAspectRatio="none"><path d="M26 116 L82 54 L143 93 L192 34 L244 77 L294 25"/></svg>
+        </div>
+        <p class="kicker">Дело закрыто</p>
+        <h2>Небо найдено</h2>
+        <p class="final-copy">Миньоны сознались. Они не хотели его красть — только спрятали самое красивое небо так хорошо, чтобы оно досталось нужному человеку.</p>
+        <div class="final-code-label">Код последнего замка</div>
+        <div class="final-code"><span>2</span><span>6</span><span>0</span><span>7</span></div>
+        <p class="final-instruction">Открой папку. Всё самое важное ждёт внутри.</p>
+        <div class="signature">Для Ангелины · 20 лет под этим небом</div>
+      </section>
+    </section>
+  </main>
+
+  <footer>Бюро небесных расследований · Материалы не подлежат передаче Грю</footer>
+  <script src="script.js"></script>
+</body>
+</html>
