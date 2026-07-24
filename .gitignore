@@ -1,0 +1,17 @@
+# Локальная шпаргалка с ответами — не публиковать
+README.md
+SOLUTIONS.md
+
+# Служебные директории окружения
+.omo/
+.playwright-mcp/
+
+# Скриншоты и временные файлы Playwright
+*.png
+*.jpeg
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
