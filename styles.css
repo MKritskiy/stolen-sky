@@ -219,6 +219,7 @@ h1 em { color: var(--gold); font-style: normal; }
 .compass-hub { fill: var(--gold); }
 .compass-readout { fill: var(--paper); font-family: var(--serif); font-size: 10px; letter-spacing: .04em; }
 .compass-hint { margin: 6px 0 0; color: var(--muted); font-size: 8px; letter-spacing: .14em; text-transform: uppercase; }
+.compass-hint.ok { color: var(--success); }
 
 .checkpoint, .decoder, .finale { text-align: center; }
 .checkpoint > p:not(.kicker), .decoder > p:not(.kicker), .final-copy, .final-instruction { color: #b7c4cb; font-size: 12px; line-height: 1.6; }

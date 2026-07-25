@@ -89,6 +89,10 @@
   // cloud = initCloud() определяется ниже; к моменту вызова goTo (по клику) уже готов.
   function goTo(index) {
     clues.forEach((c, i) => c.classList.toggle("active", i === index));
+    // При возврате к улике прячем соседние секции-рубежи, иначе они остаются на экране.
+    checkpoint.classList.add("hidden");
+    decoder.classList.add("hidden");
+    finale.classList.add("hidden");
     clues[index].scrollIntoView({ behavior: "smooth", block: "start" });
     if (index === 0) window.setTimeout(() => cloud.resize(), 50);
     updateNav();
@@ -354,10 +358,9 @@
     let locked = false;
 
     function reset(msg) {
-      const placed = cards.filter((c) => c.disabled);
+      const placed = cards.filter((c) => c.classList.contains("picked"));
       order = [];
       cards.forEach((c) => {
-        c.disabled = false;
         c.classList.remove("picked");
         delete c.dataset.order;
       });
@@ -371,11 +374,24 @@
     }
 
     function pick(card) {
-      if (locked || card.disabled) return;
-      order.push(card.dataset.pos);
+      if (locked) return;
+      const pos = card.dataset.pos;
+      // повторный тап по последней расставленной — отменяет её (и так по цепочке назад)
+      if (card.classList.contains("picked")) {
+        if (order[order.length - 1] === pos) {
+          order.pop();
+          card.classList.remove("picked");
+          delete card.dataset.order;
+          status.textContent =
+            order.length === 0
+              ? "Тапай рейсы в порядке вылета"
+              : `Расставлено: ${order.length} из 4`;
+        }
+        return;
+      }
+      order.push(pos);
       card.dataset.order = String(order.length);
       card.classList.add("picked");
-      card.disabled = true;
       status.textContent = `Расставлено: ${order.length} из 4`;
       if (order.length === 4) check();
     }
@@ -585,6 +601,7 @@
     const arrow = document.getElementById("driftArrow");
     const readout = document.getElementById("compassReadout");
     const marks = document.getElementById("compassMarks");
+    const hint = document.getElementById("compassHint");
     const form = document.getElementById("compassForm");
     const input = document.getElementById("answer-3");
     const feedback = document.getElementById("feedback-3");
@@ -647,6 +664,8 @@
         readout.textContent = "45°";
         svg.style.pointerEvents = "none";
         form.closest(".clue").classList.add("mechanism-solved");
+        hint.textContent = "Угол верный";
+        hint.classList.add("ok");
         form.classList.remove("hidden");
         // автофокус убран — клавиатура на iOS не выезжает автоматически
       }
@@ -684,6 +703,8 @@
         setArrow(TARGET);
         svg.style.pointerEvents = "none";
         form.closest(".clue").classList.add("mechanism-solved");
+        hint.textContent = "Угол верный";
+        hint.classList.add("ok");
         form.classList.remove("hidden");
         input.value = expectedDigits[3];
         input.disabled = true;

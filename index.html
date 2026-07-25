@@ -161,11 +161,11 @@
             <circle class="compass-hub" cx="100" cy="100" r="6" />
             <text class="compass-readout" id="compassReadout" x="100" y="128" text-anchor="middle">0°</text>
           </svg>
-          <p class="compass-hint">Тяни стрелку, чтобы указать истинный путь</p>
+          <p class="compass-hint" id="compassHint">Тяни стрелку, чтобы указать истинный путь</p>
         </div>
         <form class="answer-form hidden" id="compassForm">
           <div class="answer-row">
-            <input id="answer-3" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-describedby="feedback-3" placeholder="Цифра">
+            <input id="answer-3" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-describedby="feedback-3">
             <button type="submit">Проверить</button>
           </div>
           <p class="feedback" id="feedback-3"></p>
@@ -177,21 +177,15 @@
         <p class="kicker">Первый рубеж пройден</p>
         <h2>Код восстановлен</h2>
         <div class="big-code" aria-label="Код 7 1 3 4"><span>7</span><span>1</span><span>3</span><span>4</span></div>
-        <p>Введи эти цифры на замке отдельной коробочки. Внутри лежит ключ от второго уровня шкатулки.</p>
-        <div class="instruction-card">
-          <span>01</span><p>Открой коробочку кодом <strong>7134</strong></p>
-          <span>02</span><p>Возьми ключ и открой <strong>второй уровень</strong> шкатулки</p>
-          <span>03</span><p>Допроси миньонов и найди бумажную шифровку</p>
-        </div>
+        <p>Введи эти цифры на замке отдельной коробочки.</p>
         <button class="primary-button" id="haveCipherButton" type="button">Шифровка у меня <span>→</span></button>
       </section>
 
       <section class="decoder hidden" id="decoder">
         <div class="decoder-orbit" aria-hidden="true"><span></span></div>
         <p class="kicker">Последний протокол</p>
-        <h2>Расшифруй признание</h2>
-        <p>Миньоны оставили четыре числа и подпись <strong class="signature-clue">А1Я33</strong>. Каждое число — это буква. Разберись, что значит подпись, и переведи числа в слово.</p>
-        <p class="decoder-hint">Введи слово, которое получилось.</p>
+        <h2>Расшифруй послание</h2>
+        <p>Миньоны оставили четыре числа и подпись <strong class="signature-clue">А1Я33</strong>. Разгадай этот шифр.</p>
         <form id="cipherForm" class="cipher-form">
           <label for="cipherInput">Секретное слово</label>
           <input id="cipherInput" type="text" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="••••" maxlength="12" aria-describedby="cipherFeedback">
