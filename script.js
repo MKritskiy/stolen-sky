@@ -3,7 +3,7 @@
 
   const state = { solved: 0, cipherSolved: false };
   const STORAGE_KEY = "case20_progress";
-  const expectedDigits = ["8", "1", "3", "4"];
+  const expectedDigits = ["7", "1", "3", "4"];
 
   /* ---------- сохранение прогресса ---------- */
   function persist() {
@@ -29,7 +29,7 @@
   const investigation = document.querySelector("#investigation");
   const progressFill = document.querySelector("#progressFill");
   const progressLabel = document.querySelector("#progressLabel");
-  const digitSlots = [...document.querySelectorAll(".digits span")];
+  const digitSlots = [...document.querySelectorAll(".digit-slot")];
   const clues = [...document.querySelectorAll(".clue")];
   const checkpoint = document.querySelector("#checkpoint");
   const decoder = document.querySelector("#decoder");
@@ -40,7 +40,7 @@
     0: [
       "Покрути облако частиц и найди тот ракурс, с которого проступает цифра.",
       "Цифру размазывает любой наклон. Нужен вид строго «в лицо» облаку — без поворота влево/вправо и без наклона вверх/вниз.",
-      "Это восьмёрка. Ответ: 8."
+      "Это семёрка с перекладиной посередине. Ответ: 7."
     ],
     1: [
       "«Между Казанью и Сочи ровно два рейса» — значит они на противоположных концах очереди (позиции 1 и 4).",
@@ -101,10 +101,19 @@
       const hasNext = i < clues.length - 1 && clues[i + 1].dataset.solved === "1";
       next.style.visibility = hasNext ? "" : "hidden";
     });
+    // цифры-навигация: доступны решённые + текущая
+    const currentActive = clues.findIndex((c) => c.classList.contains("active"));
+    digitSlots.forEach((slot, i) => {
+      const solved = clues[i].dataset.solved === "1";
+      const accessible = solved || i === currentActive;
+      slot.classList.toggle("accessible", accessible);
+      slot.classList.toggle("current", i === currentActive);
+      slot.disabled = !accessible;
+    });
   }
 
   function updateProgress(index, digit) {
-    digitSlots[index].textContent = digit;
+    digitSlots[index].querySelector("span").textContent = digit;
     digitSlots[index].classList.add("revealed");
     progressLabel.textContent = `${index + 1} / 4`;
     progressFill.style.width = `${(index + 1) * 25}%`;
@@ -136,25 +145,37 @@
     const canvas = document.getElementById("cloudCanvas");
     const overlay = document.getElementById("cloudOverlay");
     const readout = document.getElementById("cloudReadout");
-    const result = document.getElementById("cloudResult");
     const ctx = canvas.getContext("2d");
     const form = document.getElementById("cloudForm");
     const input = document.getElementById("answer-0");
     const feedback = document.getElementById("feedback-0");
 
-    // точки, образующие цифру 8 на плоскости XY + случайная глубина Z
+    // точки, образующие цифру 7 с перекладиной на плоскости XY + случайная глубина Z
     function buildPoints() {
       const p = [];
-      // верхнее кольцо (меньше): центр (0, 0.32), радиус 0.24
-      for (let i = 0; i < 16; i += 1) {
-        const a = (i / 16) * Math.PI * 2;
-        p.push([Math.cos(a) * 0.24, 0.32 + Math.sin(a) * 0.24, (Math.random() * 2 - 1) * 1.3]);
+      // помощник: точки вдоль отрезка (x1,y1)-(x2,y2), n точек + утолщение (3 параллельных ряда)
+      function stroke(x1, y1, x2, y2, n, thickness) {
+        const dx = x2 - x1, dy = y2 - y1;
+        const len = Math.hypot(dx, dy) || 1;
+        // перпендикуляр для утолщения
+        const nx = -dy / len, ny = dx / len;
+        const offs = [-thickness, 0, thickness];
+        for (const off of offs) {
+          for (let i = 0; i < n; i += 1) {
+            const t = n === 1 ? 0.5 : i / (n - 1);
+            const px = x1 + dx * t + nx * off;
+            const py = y1 + dy * t + ny * off;
+            p.push([px, py, (Math.random() * 2 - 1) * 0.9]);
+          }
+        }
       }
-      // нижнее кольцо (больше): центр (0, -0.30), радиус 0.38
-      for (let i = 0; i < 26; i += 1) {
-        const a = (i / 26) * Math.PI * 2;
-        p.push([Math.cos(a) * 0.38, -0.30 + Math.sin(a) * 0.38, (Math.random() * 2 - 1) * 1.3]);
-      }
+      // верхний горизонтальный штрих: слева вверх направо
+      stroke(-0.32, 0.44, 0.34, 0.44, 12, 0.035);
+      // основная диагональ: из правого конца верхней перекладины вниз влево
+      stroke(0.34, 0.44, -0.30, -0.44, 16, 0.035);
+      // средняя перекладина (короткий горизонтальный штрих поперёк диагонали на y≈0)
+      // точка диагонали при y=0: t=(0.44)/(0.88)=0.5 → x≈0.02; штрих симметричен
+      stroke(-0.13, 0.02, 0.17, 0.02, 7, 0.035);
       return p;
     }
     let points = buildPoints();
@@ -227,24 +248,16 @@
       velY *= 0.9;
       drawFrame();
 
-      // проверка попадания в целевой ракурс (0,0)
+      // мягкая подсказка без фиксации: облако крутится всегда, форма доступна сразу
       const normY = normAngle(rotY);
       const normX = normAngle(rotX);
-      if (Math.abs(normY) < 0.2 && Math.abs(normX) < 0.2 && !dragging) {
+      const aligned = Math.abs(normY) < 0.2 && Math.abs(normX) < 0.2 && !dragging;
+      if (aligned) {
         holdTimer += 1;
-        readout.textContent = "Свет сходится…";
-        if (holdTimer > 18) {
-          locked = true;
-          result.textContent = "Это цифра";
-          result.classList.add("found");
-          readout.textContent = "Ракурс найден";
-          canvas.style.pointerEvents = "none";
-          form.classList.remove("hidden");
-          // автофокус убран — клавиатура на iOS не выезжает; пользователь тапает по полю сам
-        }
+        readout.textContent = holdTimer > 12 ? "Цифра хорошо видна" : "Свет сходится…";
       } else {
         holdTimer = 0;
-        if (!locked) readout.textContent = dragging ? "Вращай облако…" : "Вращай облако пальцем";
+        readout.textContent = dragging ? "Вращай облако…" : "Вращай облако пальцем";
       }
       requestAnimationFrame(render);
     }
@@ -286,6 +299,8 @@
     canvas.addEventListener("pointercancel", up);
 
     resize();
+    // форма ввода доступна сразу — пользователь сам решает, когда разглядел цифру
+    form.classList.remove("hidden");
     window.addEventListener("resize", () => {
       if (clues[0].classList.contains("active")) resize();
     });
@@ -313,12 +328,9 @@
         locked = true;
         rotX = 0;
         rotY = 0;
-        resize();   // установить размеры canvas (parent может быть display:none → fallback 280)
+        resize();
         drawFrame();
-        result.textContent = "Это цифра";
-        result.classList.add("found");
         readout.textContent = "Ракурс найден";
-        canvas.style.pointerEvents = "none";
         form.classList.remove("hidden");
         input.value = expectedDigits[0];
         input.disabled = true;
@@ -682,37 +694,98 @@
     };
   }
 
-  /* ---------- кнопки подсказок ---------- */
-  document.querySelectorAll(".hint-button").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const key = btn.dataset.hint;
-      const list = hints[key];
-      if (!list) return;
-      const idx = Math.min(hintIndex[key], list.length - 1);
-      const textEl = document.querySelector(`#hint-${key}`);
-      if (textEl) {
-        textEl.textContent = list[idx];
-        textEl.classList.add("visible");
-      }
-      hintIndex[key] = idx + 1;
-      if (hintIndex[key] >= list.length) {
-        btn.textContent = "Подсказок больше нет";
-        btn.disabled = true;
-      } else {
-        btn.textContent = "Ещё подсказка";
-      }
+  /* ---------- подсказки: квадратики + модал ---------- */
+  // построить модал один раз
+  const hintModal = document.createElement("div");
+  hintModal.className = "hint-modal hidden";
+  hintModal.innerHTML = '<div class="hint-modal-card" role="dialog" aria-modal="true"><div class="hint-modal-dots" id="hintModalDots"></div><p class="hint-modal-text" id="hintModalText"></p><div class="hint-modal-nav"><button type="button" class="hint-modal-prev" id="hintModalPrev">← назад</button><button type="button" class="hint-modal-close" id="hintModalClose">закрыть</button></div></div>';
+  document.body.appendChild(hintModal);
+  const hintModalText = hintModal.querySelector("#hintModalText");
+  const hintModalDots = hintModal.querySelector("#hintModalDots");
+  const hintModalPrev = hintModal.querySelector("#hintModalPrev");
+  const hintModalClose = hintModal.querySelector("#hintModalClose");
+  let hintModalCtx = null; // { key, list, unlocked, current }
+
+  function renderHintModal() {
+    if (!hintModalCtx) return;
+    const { list, unlocked, current } = hintModalCtx;
+    hintModalText.textContent = list[current];
+    // точки: пронумерованные квадратики 1..list.length, доступны current<=unlocked, активный=current
+    hintModalDots.innerHTML = "";
+    list.forEach((_, i) => {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "hint-dot";
+      dot.textContent = i + 1;
+      if (i === current) dot.classList.add("active");
+      if (i > unlocked) dot.classList.add("locked");
+      dot.addEventListener("click", () => {
+        if (i > hintModalCtx.unlocked) return;
+        hintModalCtx.current = i;
+        renderHintModal();
+      });
+      hintModalDots.appendChild(dot);
     });
+    hintModalPrev.style.visibility = current > 0 ? "" : "hidden";
+  }
+  function openHintModal(key) {
+    const list = hints[key];
+    if (!list) return;
+    hintModalCtx = { key, list, unlocked: hintIndex[key], current: Math.min(hintIndex[key], list.length - 1) };
+    renderHintModal();
+    hintModal.classList.remove("hidden");
+  }
+  hintModalClose.addEventListener("click", () => { hintModal.classList.add("hidden"); });
+  hintModalPrev.addEventListener("click", () => {
+    if (!hintModalCtx || hintModalCtx.current <= 0) return;
+    hintModalCtx.current -= 1;
+    renderHintModal();
   });
+  hintModal.addEventListener("click", (e) => { if (e.target === hintModal) hintModal.classList.add("hidden"); });
+
+  // построить квадратики подсказок в каждой секции с data-hint
+  document.querySelectorAll("[data-hint]").forEach((btn) => {
+    // btn — старая кнопка .hint-button; заменим её на контейнер квадратиков
+    const key = btn.dataset.hint;
+    const list = hints[key];
+    if (!list) return;
+    const wrap = document.createElement("div");
+    wrap.className = "hint-pips";
+    list.forEach((_, i) => {
+      const pip = document.createElement("button");
+      pip.type = "button";
+      pip.className = "hint-pip";
+      pip.textContent = i + 1;
+      pip.title = `Подсказка ${i + 1}`;
+      pip.addEventListener("click", () => {
+        // открыть уровень i, если он уже разблокирован — иначе разблокировать следующий по очереди
+        if (i > hintIndex[key]) return;
+        if (i === hintIndex[key]) hintIndex[key] = Math.min(hintIndex[key] + 1, list.length);
+        openHintModalAt(key, i);
+      });
+      wrap.appendChild(pip);
+    });
+    btn.replaceWith(wrap);
+  });
+  function openHintModalAt(key, idx) {
+    const list = hints[key];
+    if (!list) return;
+    hintModalCtx = { key, list, unlocked: hintIndex[key], current: idx };
+    renderHintModal();
+    hintModal.classList.remove("hidden");
+  }
 
   /* ---------- навигация ---------- */
   document.querySelector("#startButton").addEventListener("click", () => {
     hero.classList.add("hidden");
     showSection(investigation);
     window.setTimeout(() => cloud.resize(), 300);
+    updateNav();
   });
 
   document.querySelector("#haveCipherButton").addEventListener("click", () => {
     checkpoint.classList.add("hidden");
+    clues.forEach((c) => c.classList.remove("active"));
     showSection(decoder);
   });
 
@@ -729,6 +802,7 @@
       persist();
       window.setTimeout(() => {
         decoder.classList.add("hidden");
+        clues.forEach((c) => c.classList.remove("active"));
         showSection(finale);
       }, 650);
     } else {
@@ -784,6 +858,19 @@
     clue.appendChild(nav);
   });
 
+  /* ---------- навигация через цифры прогресса ---------- */
+  digitSlots.forEach((slot) => {
+    slot.addEventListener("click", () => {
+      const target = Number(slot.dataset.clueJump);
+      if (Number.isNaN(target)) return;
+      const solved = clues[target].dataset.solved === "1";
+      const currentActive = clues.findIndex((c) => c.classList.contains("active"));
+      if (solved || target === currentActive) goTo(target);
+    });
+  });
+  // при старте (клик по #startButton) первая улика активна → цифра 0 доступна
+  updateNav();
+
   /* ---------- восстановление прогресса ---------- */
   function restore() {
     const data = loadSaved();
@@ -794,7 +881,7 @@
       const clue = clues[i];
       clue.dataset.solved = "1";
       clue.classList.remove("active");
-      digitSlots[i].textContent = expectedDigits[i];
+      digitSlots[i].querySelector("span").textContent = expectedDigits[i];
       digitSlots[i].classList.add("revealed");
       // визуальное «решённое» состояние каждой механики
       if (i === 0) cloud.restoreSolved();
