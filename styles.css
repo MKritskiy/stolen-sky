@@ -42,7 +42,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .orb-two { width: 220px; height: 220px; background: var(--gold); left: -120px; bottom: 8%; }
 
 footer { position: relative; z-index: 1; flex: 0 0 auto; }
-main { position: relative; z-index: 1; flex: 1 1 auto; min-height: 0; overflow: hidden; overscroll-behavior: contain; }
+main { position: relative; z-index: 1; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .case-header {
   width: min(100% - 32px, 760px);
   margin: 0 auto;
