@@ -23,6 +23,7 @@
   <header class="case-header">
     <div class="eyebrow"><span class="pulse"></span> Бейкер-стрит · закрытый архив</div>
     <div class="case-number">Дело № 20</div>
+    <button class="reset-link" id="resetProgress" type="button" title="Сбросить прогресс">↻</button>
   </header>
 
   <main>
@@ -47,23 +48,16 @@
 
     <section class="investigation hidden" id="investigation" aria-live="polite">
       <div class="progress-wrap">
-        <div class="progress-meta">
-          <span>Ход расследования</span>
-          <span id="progressLabel">0 / 4</span>
-        </div>
-        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
         <div class="digits" id="digits" aria-label="Улики">
           <button class="digit-slot" type="button" data-clue-jump="0"><span>—</span></button>
           <button class="digit-slot" type="button" data-clue-jump="1"><span>—</span></button>
           <button class="digit-slot" type="button" data-clue-jump="2"><span>—</span></button>
           <button class="digit-slot" type="button" data-clue-jump="3"><span>—</span></button>
         </div>
-        <button class="reset-link" id="resetProgress" type="button">сбросить прогресс</button>
       </div>
 
       <article class="clue active" data-clue="0" data-answer="7">
-        <div class="clue-topline"><span>Улика 01</span><span>Облако · перспектива</span></div>
-        <h2>Скрытое в облаке</h2>
+        <div class="clue-head"><span class="clue-num">Улика 01</span><h2>Скрытое в облаке</h2></div>
         <p class="dispatch">Свидетель оставил запись: «Я разглядел это лишь однажды — когда свет упал под единственно верным углом».</p>
         <div class="cloud-stage">
           <canvas class="point-cloud" id="cloudCanvas"></canvas>
@@ -83,9 +77,8 @@
       </article>
 
       <article class="clue" data-clue="1" data-answer="1">
-        <div class="clue-topline"><span>Улика 02</span><span>Маршрутный журнал</span></div>
-        <h2>Очерёдность вылета</h2>
-        <p class="dispatch">Журнал диспетчера залит кофе, но три обрывка показаний уцелели. Восстанови по ним очерёдность вылета четырёх рейсов и укажи рейс, ушедший третьим, — последняя цифра его номера и есть ответ.</p>
+        <div class="clue-head"><span class="clue-num">Улика 02</span><h2>Очерёдность вылета</h2></div>
+        <p class="dispatch">Журнал диспетчера залит кофе, но три обрывка показаний уцелели. Восстанови по ним очерёдность вылета 4 рейсов. Последняя цифра номера третьего и есть ответ.</p>
         <ol class="clue-list">
           <li>«Между вылетом Казани и Сочи уместилось ровно два других рейса.»</li>
           <li>«Самара поднялась в воздух раньше Москвы.»</li>
@@ -99,7 +92,6 @@
         </div>
         <p class="journal-status" id="journalStatus">Тапай рейсы в порядке вылета: от первого к последнему</p>
         <form class="answer-form hidden" id="journalForm">
-          <label for="answer-1">Последняя цифра номера третьего рейса</label>
           <div class="answer-row">
             <input id="answer-1" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-describedby="feedback-1">
             <button type="submit">Проверить</button>
@@ -110,12 +102,9 @@
       </article>
 
       <article class="clue" data-clue="2" data-answer="3">
-        <div class="clue-topline"><span>Улика 03</span><span>Приборная панель · логика</span></div>
-        <h2>Цветовой код</h2>
+        <div class="clue-head"><span class="clue-num">Улика 03</span><h2>Цветовой код</h2></div>
         <p class="dispatch">Четыре тумблера окрашивают цепи в цвета. Разберись, как пересекаются цепи, и набери нужную комбинацию ламп.</p>
-        <ol class="clue-list">
-          <li>«Радиограмма из архива: "Открой навстречу свету три окна — цвет молодого листа, цвет спелого мёда и цвет неба над головою. А цвет открытого огня оставь во тьме." Штурвал укажет цифру ответа.»</li>
-        </ol>
+        <p class="clue-note">«Радиограмма из архива: "Открой навстречу свету три окна — цвет молодого листа, цвет спелого мёда и цвет неба над головою. А цвет открытого огня оставь во тьме." Штурвал укажет цифру ответа.»</p>
         <div class="panel-board" id="panelBoard">
           <div class="panel-toggles">
             <button class="toggle" type="button" data-sw="R"><span class="tg-name">Радио</span><span class="tg-track"><i class="tg-knob"></i></span></button>
@@ -146,7 +135,6 @@
         </div>
         <p class="panel-status" id="panelStatus">Настрой панель так, чтобы сошлись все условия</p>
         <form class="answer-form hidden" id="panelForm">
-          <label for="answer-2">Какую цифру показывает штурвал-селектор?</label>
           <div class="answer-row">
             <input id="answer-2" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-describedby="feedback-2">
             <button type="submit">Проверить</button>
@@ -157,8 +145,7 @@
       </article>
 
       <article class="clue" data-clue="3" data-answer="4">
-        <div class="clue-topline"><span>Улика 04</span><span>Бортовой журнал · снос</span></div>
-        <h2>Куда улетел самолёт</h2>
+        <div class="clue-head"><span class="clue-num">Улика 04</span><h2>Куда улетел самолёт</h2></div>
         <p class="dispatch">Командир держал курс ровно на СЕВЕР. Но весь полёт ветер дул с ЗАПАДА — в точности с той же силой, что тяга двигателей. Приземлившись, он увидел, что сбился с маршрута. Определи угол между тем, куда он смотрел, и тем, куда улетел на самом деле. Первая цифра этого угла и есть ответ.</p>
         <div class="compass-wrap">
           <svg class="compass" id="compass" viewBox="0 0 200 200">
@@ -177,9 +164,8 @@
           <p class="compass-hint">Тяни стрелку, чтобы указать истинный путь</p>
         </div>
         <form class="answer-form hidden" id="compassForm">
-          <label for="answer-3">Назови первую цифру угла сноса</label>
           <div class="answer-row">
-            <input id="answer-3" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-describedby="feedback-3">
+            <input id="answer-3" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-describedby="feedback-3" placeholder="Цифра">
             <button type="submit">Проверить</button>
           </div>
           <p class="feedback" id="feedback-3"></p>

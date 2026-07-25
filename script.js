@@ -27,8 +27,7 @@
 
   const hero = document.querySelector("#hero");
   const investigation = document.querySelector("#investigation");
-  const progressFill = document.querySelector("#progressFill");
-  const progressLabel = document.querySelector("#progressLabel");
+  const progressLabel = document.querySelector("#progressLabel"); // may be null after redesign
   const digitSlots = [...document.querySelectorAll(".digit-slot")];
   const clues = [...document.querySelectorAll(".clue")];
   const checkpoint = document.querySelector("#checkpoint");
@@ -95,19 +94,13 @@
     updateNav();
   }
   function updateNav() {
-    clues.forEach((clue, i) => {
-      const next = clue.querySelector(".nav-next");
-      if (!next) return;
-      const hasNext = i < clues.length - 1 && clues[i + 1].dataset.solved === "1";
-      next.style.visibility = hasNext ? "" : "hidden";
-    });
-    // цифры-навигация: доступны решённые + текущая
-    const currentActive = clues.findIndex((c) => c.classList.contains("active"));
+    // цифры-навигация: доступны решённые + самая дальняя нерешённая (к ней всегда можно вернуться)
+    const furthest = Math.min(state.solved, clues.length - 1);
     digitSlots.forEach((slot, i) => {
       const solved = clues[i].dataset.solved === "1";
-      const accessible = solved || i === currentActive;
+      const accessible = solved || i === furthest;
       slot.classList.toggle("accessible", accessible);
-      slot.classList.toggle("current", i === currentActive);
+      slot.classList.toggle("current", i === furthest && !solved);
       slot.disabled = !accessible;
     });
   }
@@ -115,8 +108,7 @@
   function updateProgress(index, digit) {
     digitSlots[index].querySelector("span").textContent = digit;
     digitSlots[index].classList.add("revealed");
-    progressLabel.textContent = `${index + 1} / 4`;
-    progressFill.style.width = `${(index + 1) * 25}%`;
+    if (progressLabel) progressLabel.textContent = `${index + 1} / 4`;
   }
 
   /* ---------- единая разгадка улики ---------- */
@@ -314,6 +306,7 @@
         feedback.className = "feedback success";
         input.disabled = true;
         form.querySelector("button[type=submit]").disabled = true;
+        form.closest(".clue").classList.add("mechanism-solved");
         solveClue(0);
       } else {
         feedback.textContent = "Не та цифра. Присмотрись к облаку ещё раз.";
@@ -331,6 +324,7 @@
         resize();
         drawFrame();
         readout.textContent = "Ракурс найден";
+        form.closest(".clue").classList.add("mechanism-solved");
         form.classList.remove("hidden");
         input.value = expectedDigits[0];
         input.disabled = true;
@@ -392,8 +386,9 @@
       if (correct) {
         locked = true;
         cards.forEach((c) => (c.disabled = true));
-        status.textContent = "Верно: очерёдность восстановлена · Москва №401 ушла третьей";
+        status.textContent = "Верно: очерёдность восстановлена";
         status.classList.add("ok");
+        form.closest(".clue").classList.add("mechanism-solved");
         form.classList.remove("hidden");
       } else {
         reset("Неверный порядок вылета. Восстанови очерёдность по показаниям и начни заново.");
@@ -427,8 +422,9 @@
           c.classList.add("picked");
           c.disabled = true;
         });
-        status.textContent = "Очерёдность восстановлена · Москва №401 ушла третьей";
+        status.textContent = "Верно: очерёдность восстановлена";
         status.classList.add("ok");
+        form.closest(".clue").classList.add("mechanism-solved");
         form.classList.remove("hidden");
         input.value = expectedDigits[1];
         input.disabled = true;
@@ -511,6 +507,7 @@
         board.classList.add("solved");
         status.textContent = `Лампы сошлись. Штурвал на отметке ${dialVal}.`;
         status.classList.add("ok");
+        form.closest(".clue").classList.add("mechanism-solved");
         form.classList.remove("hidden");
         // автофокус убран — клавиатура на iOS не выезжает автоматически
       } else {
@@ -569,6 +566,7 @@
         board.classList.add("solved");
         status.textContent = "Лампы сошлись. Штурвал на отметке 3.";
         status.classList.add("ok");
+        form.closest(".clue").classList.add("mechanism-solved");
         form.classList.remove("hidden");
         input.value = expectedDigits[2];
         input.disabled = true;
@@ -648,6 +646,7 @@
         setArrow(TARGET);
         readout.textContent = "45°";
         svg.style.pointerEvents = "none";
+        form.closest(".clue").classList.add("mechanism-solved");
         form.classList.remove("hidden");
         // автофокус убран — клавиатура на iOS не выезжает автоматически
       }
@@ -684,6 +683,7 @@
         locked = true;
         setArrow(TARGET);
         svg.style.pointerEvents = "none";
+        form.closest(".clue").classList.add("mechanism-solved");
         form.classList.remove("hidden");
         input.value = expectedDigits[3];
         input.disabled = true;
@@ -832,40 +832,14 @@
   const panel = initPanel();
   const compass = initCompass();
 
-  /* ---------- навигация между уликами (возврат к решённым) ---------- */
-  clues.forEach((clue, i) => {
-    const nav = document.createElement("div");
-    nav.className = "clue-nav";
-    const prev = document.createElement("button");
-    prev.className = "nav-button nav-prev";
-    prev.type = "button";
-    if (i > 0) {
-      prev.textContent = `← Улика 0${i}`;
-      prev.addEventListener("click", () => goTo(i - 1));
-    } else {
-      prev.style.visibility = "hidden";
-    }
-    const next = document.createElement("button");
-    next.className = "nav-button nav-next";
-    next.type = "button";
-    if (i < clues.length - 1) {
-      next.textContent = `Улика 0${i + 2} →`;
-      next.addEventListener("click", () => goTo(i + 1));
-    }
-    next.style.visibility = "hidden";
-    nav.appendChild(prev);
-    nav.appendChild(next);
-    clue.appendChild(nav);
-  });
-
   /* ---------- навигация через цифры прогресса ---------- */
   digitSlots.forEach((slot) => {
     slot.addEventListener("click", () => {
       const target = Number(slot.dataset.clueJump);
       if (Number.isNaN(target)) return;
       const solved = clues[target].dataset.solved === "1";
-      const currentActive = clues.findIndex((c) => c.classList.contains("active"));
-      if (solved || target === currentActive) goTo(target);
+      const furthest = Math.min(state.solved, clues.length - 1);
+      if (solved || target === furthest) goTo(target);
     });
   });
   // при старте (клик по #startButton) первая улика активна → цифра 0 доступна
@@ -890,8 +864,7 @@
       if (i === 3) compass.restoreSolved();
     }
     state.solved = n;
-    progressLabel.textContent = `${n} / 4`;
-    progressFill.style.width = `${n * 25}%`;
+    if (progressLabel) progressLabel.textContent = `${n} / 4`;
     updateNav();
 
     if (data.cipher) {
